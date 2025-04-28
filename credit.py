@@ -5,12 +5,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, classification_report
-
 
 # --- Streamlit Page Config ---
 st.set_page_config(page_title="Fraud Detection Dashboard", layout="wide")
@@ -18,15 +18,12 @@ st.set_page_config(page_title="Fraud Detection Dashboard", layout="wide")
 # --- Title ---
 st.title("🛡️ Credit Card Fraud Detection Dashboard")
 
-# --- Sidebar for Actions ---
-st.sidebar.title("Actions")
-
-# --- Upload CSV File ---
-uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=["csv"])
+# --- Upload CSV ---
+uploaded_file = st.file_uploader("Upload your credit card dataset (CSV file)", type=["csv"])
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-    st.success("Dataset Uploaded Successfully!")
+    st.success("Dataset Loaded Successfully!")
 
     # --- Show Data ---
     if st.checkbox("Show Raw Data"):
@@ -37,7 +34,7 @@ if uploaded_file is not None:
     st.write("Number of transactions:", df.shape[0])
     st.write("Number of features:", df.shape[1])
 
-    # Class distribution
+    # --- Class Distribution ---
     st.subheader("Class Distribution")
     class_counts = df['Class'].value_counts()
     st.bar_chart(class_counts)
@@ -49,7 +46,7 @@ if uploaded_file is not None:
     st.pyplot(fig)
 
     # --- Data Preparation ---
-    st.sidebar.subheader("Data Preparation")
+    st.sidebar.title("Model Training and Testing")
     test_size = st.sidebar.slider("Test Set Size (%)", 10, 50, 20)
 
     X = df.drop(["Class"], axis=1)
@@ -63,7 +60,6 @@ if uploaded_file is not None:
     )
 
     # --- Model Selection ---
-    st.sidebar.subheader("Model Selection")
     model_choice = st.sidebar.selectbox("Choose Model", ("Logistic Regression", "Random Forest"))
 
     if model_choice == "Logistic Regression":
@@ -71,45 +67,46 @@ if uploaded_file is not None:
     elif model_choice == "Random Forest":
         model = RandomForestClassifier()
 
-    # --- Train Model ---
+    # --- Train Model Button ---
     if st.sidebar.button("Train Model"):
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
-    st.subheader("Model Performance Metrics")
+        st.subheader("Model Performance Metrics")
 
-    # --- Metric Selection Dropdown ---
-    metric_option = st.selectbox(
-        "Select what you want to display:",
-        ("Accuracy Only", "Classification Report", "Confusion Matrix", "All Metrics")
-    )
+        # --- Metric Selection Dropdown ---
+        metric_option = st.selectbox(
+            "Select what you want to display:",
+            ("Accuracy Only", "Classification Report", "Confusion Matrix", "All Metrics")
+        )
 
-    if metric_option == "Accuracy Only":
-        st.metric(label="Accuracy", value=round(accuracy_score(y_test, y_pred), 4))
-        st.metric(label="ROC-AUC", value=round(roc_auc_score(y_test, y_pred), 4))
+        if metric_option == "Accuracy Only":
+            st.metric(label="Accuracy", value=round(accuracy_score(y_test, y_pred), 4))
+            st.metric(label="ROC-AUC", value=round(roc_auc_score(y_test, y_pred), 4))
 
-    elif metric_option == "Classification Report":
-        st.text("Classification Report:")
-        st.text(classification_report(y_test, y_pred))
+        elif metric_option == "Classification Report":
+            st.text("Classification Report:")
+            st.text(classification_report(y_test, y_pred))
 
-    elif metric_option == "Confusion Matrix":
-        st.text("Confusion Matrix:")
-        cm = confusion_matrix(y_test, y_pred)
-        fig2, ax2 = plt.subplots()
-        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax2)
-        st.pyplot(fig2)
+        elif metric_option == "Confusion Matrix":
+            st.text("Confusion Matrix:")
+            cm = confusion_matrix(y_test, y_pred)
+            fig2, ax2 = plt.subplots()
+            sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax2)
+            st.pyplot(fig2)
 
-    elif metric_option == "All Metrics":
-        st.metric(label="Accuracy", value=round(accuracy_score(y_test, y_pred), 4))
-        st.metric(label="ROC-AUC", value=round(roc_auc_score(y_test, y_pred), 4))
+        elif metric_option == "All Metrics":
+            st.metric(label="Accuracy", value=round(accuracy_score(y_test, y_pred), 4))
+            st.metric(label="ROC-AUC", value=round(roc_auc_score(y_test, y_pred), 4))
 
-        st.text("Classification Report:")
-        st.text(classification_report(y_test, y_pred))
+            st.text("Classification Report:")
+            st.text(classification_report(y_test, y_pred))
 
-        st.text("Confusion Matrix:")
-        cm = confusion_matrix(y_test, y_pred)
-        fig2, ax2 = plt.subplots()
-        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax2)
-        st.pyplot(fig2)
+            st.text("Confusion Matrix:")
+            cm = confusion_matrix(y_test, y_pred)
+            fig2, ax2 = plt.subplots()
+            sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax2)
+            st.pyplot(fig2)
 
-
+else:
+    st.warning("Please upload a dataset to continue.")
