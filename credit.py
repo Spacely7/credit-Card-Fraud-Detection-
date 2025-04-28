@@ -72,8 +72,8 @@ if uploaded_file is not None:
 
     # --- Train Model ---
     if st.sidebar.button("Train Model"):
-            model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
 
     st.subheader("Model Performance Metrics")
 
